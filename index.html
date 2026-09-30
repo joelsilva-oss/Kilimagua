@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIRAS | Kilimagua - Riego Automático Subterráneo IoT y Energía Híbrida</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sahel: {
+                            sand: '#E6C594',
+                            clay: '#C86D51',
+                            earth: '#8B4513',
+                            terracotta: '#A0522D'
+                        },
+                        solar: {
+                            gold: '#F59E0B',
+                            amber: '#D97706',
+                            bright: '#FBBF24'
+                        },
+                        agri: {
+                            green: '#10B981',
+                            darkgreen: '#047857',
+                            leaf: '#34D399'
+                        },
+                        hydro: {
+                            blue: '#0284C7',
+                            deep: '#0369A1',
+                            cyan: '#06B6D4'
+                        },
+                        tech: {
+                            slate: '#0F172A',
+                            panel: '#1E293B',
+                            card: '#334155'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Firebase App & Realtime Database SDKs (Compat v10) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-card {
+            background: rgba(51, 65, 85, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-hydro-blue selection:text-white">
+
+    <!-- Sticky Navigation Header -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-700/60 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Brand Title -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-solar-gold via-agri-green to-hydro-blue p-0.5 flex items-center justify-center shadow-md">
+                        <div class="w-full h-full bg-tech-slate rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid fa-droplet text-hydro-cyan text-xl"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-solar-gold via-amber-200 to-hydro-blue bg-clip-text text-transparent" id="headerBrandName">
+                                SIRAS <span class="text-xs text-slate-400 font-normal">by Kilimagua</span>
+                            </span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-agri-green/20 text-agri-leaf font-semibold border border-agri-green/30 flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-agri-green animate-pulse"></span>
+                                <span id="headerStatusBadge">UPC Terrassa • Project Charter</span>
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 font-medium hidden sm:block" id="headerSubTitle">
+                            "Eficiencia que fluye desde la raíz" — Riego Subterráneo Híbrido Low-Cost
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center space-x-6 text-sm font-medium">
+                    <a href="#hero" class="text-slate-300 hover:text-solar-gold transition-colors">Inicio</a>
+                    <a href="#objectives" class="text-slate-300 hover:text-solar-gold transition-colors">Objetivo y Alcance</a>
+                    <a href="#architecture" class="text-slate-300 hover:text-solar-gold transition-colors">Arquitectura</a>
+                    <a href="#iot-dashboard" class="text-slate-300 hover:text-solar-gold transition-colors flex items-center gap-1">
+                        <i class="fa-solid fa-microchip text-xs text-hydro-blue"></i>
+                        Dashboard IoT
+                    </a>
+                    <a href="#calculator" class="text-slate-300 hover:text-solar-gold transition-colors">Calculadora</a>
+                    <a href="#context" class="text-slate-300 hover:text-solar-gold transition-colors">Kilimagua & Sahel</a>
+                </nav>
+
+                <!-- Actions / Config Button -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="openConfigModal()" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all hover:border-slate-400 shadow-sm" title="Datos del Proyecto">
+                        <i class="fa-solid fa-sliders text-solar-gold"></i>
+                        <span class="hidden sm:inline">Configuración</span>
+                    </button>
+                    <button onclick="openExportModal()" class="px-3.5 py-2 rounded-lg bg-gradient-to-r from-hydro-blue to-hydro-deep hover:from-sky-500 hover:to-hydro-blue text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-md transition-all hover:scale-[1.02]">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span class="hidden sm:inline">Project Charter</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="relative py-16 lg:py-24 overflow-hidden border-b border-slate-800">
+        <div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#F59E0B_1px,transparent_1px)] [background-size:24px_24px]"></div>
+        <div class="absolute -top-32 -right-32 w-96 h-96 bg-solar-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-hydro-blue/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Hero Left Column -->
+                <div class="lg:col-span-7 space-y-6 text-left">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-semibold text-sahel-sand">
+                        <i class="fa-solid fa-graduation-cap text-solar-gold"></i>
+                        <span id="heroUniversityTag">UPC BarcelonaTech • Campus Terrassa (TR1)</span>
+                    </div>
+
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                        Sistema SIRAS: <span class="bg-gradient-to-r from-solar-gold via-amber-300 to-agri-leaf bg-clip-text text-transparent">Riego Subterráneo IoT</span> para el Sahel
+                    </h1>
+
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed font-normal">
+                        Diseño e ingeniería de un sistema de riego automático subterráneo de bajo coste alimentado por energía híbrida renovable (solar + eólica) y controlado por Arduino e IoT para parcelas agrícolas en zonas de aridez extrema.
+                    </p>
+
+                    <!-- CTA Buttons -->
+                    <div class="pt-2 flex flex-wrap gap-4 items-center">
+                        <a href="#iot-dashboard" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-solar-gold to-amber-600 hover:from-amber-500 hover:to-solar-gold text-slate-950 font-bold text-sm sm:text-base flex items-center gap-2 shadow-lg shadow-solar-gold/20 hover:shadow-solar-gold/40 transition-all hover:-translate-y-0.5">
+                            <i class="fa-solid fa-toggle-on text-slate-950"></i>
+                            Dashboard de Control IoT
+                        </a>
+                        <a href="#calculator" class="px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-semibold text-sm sm:text-base flex items-center gap-2 transition-all hover:border-slate-400">
+                            <i class="fa-solid fa-calculator text-hydro-blue"></i>
+                            Calculadora de Ahorro
+                        </a>
+                    </div>
+
+                    <!-- Academic Metadata Snippet -->
+                    <div class="pt-4 border-t border-slate-800 flex flex-wrap gap-x-6 gap-y-2 text-xs text-slate-400">
+                        <div><span class="text-slate-500">Departamento:</span> <strong id="heroSubject" class="text-slate-300">Enginyeria de Projectes i de la Construcció</strong></div>
+                        <div><span class="text-slate-500">Tutora:</span> <strong id="heroAdvisor" class="text-slate-300">Elisabet Amorós Casahuga</strong></div>
+                        <div><span class="text-slate-500">Parcela Piloto:</span> <strong id="heroAreaLabel" class="text-solar-gold font-bold">100 m² (0.01 Ha)</strong></div>
+                    </div>
+                </div>
+
+                <!-- Hero Right Column (Metrics Showcase Cards) -->
+                <div class="lg:col-span-5 grid grid-cols-2 gap-4">
+                    
+                    <div class="glass-card p-5 rounded-2xl border-l-4 border-l-agri-green hover:border-l-agri-leaf transition-all hover:scale-[1.02]">
+                        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                            <span>AHORRO HÍDRICO MIN.</span>
+                            <i class="fa-solid fa-droplet-slash text-agri-leaf text-lg"></i>
+                        </div>
+                        <div class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">≥ 35%</div>
+                        <p class="text-xs text-slate-400 mt-2">Vs. Riego tradicional por manguera o aspersión.</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl border-l-4 border-l-solar-gold hover:border-l-amber-400 transition-all hover:scale-[1.02]">
+                        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                            <span>ENERGÍA HÍBRIDA</span>
+                            <i class="fa-solid fa-wind text-solar-gold text-lg"></i>
+                        </div>
+                        <div class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">48 Hrs</div>
+                        <p class="text-xs text-slate-400 mt-2">Autonomía solar + eólica sin sol ni viento.</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl border-l-4 border-l-hydro-blue hover:border-l-sky-400 transition-all hover:scale-[1.02]">
+                        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                            <span>RIEGO POR GRAVEDAD</span>
+                            <i class="fa-solid fa-water-ladder text-hydro-blue text-lg"></i>
+                        </div>
+                        <div class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">1.000 L</div>
+                        <p class="text-xs text-slate-400 mt-2">Tanques elevados de baja presión.</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl border-l-4 border-l-sahel-clay hover:border-l-amber-600 transition-all hover:scale-[1.02]">
+                        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                            <span>COSTE LOW-COST</span>
+                            <i class="fa-solid fa-euro-sign text-sahel-sand text-lg"></i>
+                        </div>
+                        <div class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">&lt; 50€</div>
+                        <p class="text-xs text-slate-400 mt-2">Presupuesto total del prototipo funcional.</p>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- OBJECTIVES & SCOPE SECTION -->
+    <section id="objectives" class="py-16 bg-slate-900/60 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <span class="text-xs font-bold uppercase tracking-widest text-solar-gold px-3 py-1 rounded-full bg-solar-gold/10 border border-solar-gold/20">
+                    Project Charter • Kilimagua
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-3">
+                    Objeto del Proyecto y Alcance Técnico
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base mt-3">
+                    Ingeniería básica orientada al desarrollo e instalación de sistemas de riego eficaces en países con escasos recursos hídricos.
+                </p>
+            </div>
+
+            <!-- Main Objective Banner Container -->
+            <div class="glass-panel p-6 sm:p-8 rounded-2xl mb-10 border border-agri-green/30 bg-gradient-to-r from-slate-900 via-tech-panel to-slate-900 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-agri-green/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                    <div class="w-16 h-16 rounded-2xl bg-agri-green/20 border border-agri-green/40 flex items-center justify-center text-agri-leaf shrink-0">
+                        <i class="fa-solid fa-bullseye text-3xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-agri-leaf uppercase tracking-wider mb-1">
+                            Objeto Principal del Proyecto (SIRAS)
+                        </h3>
+                        <p class="text-base sm:text-lg text-slate-200 leading-relaxed font-medium">
+                            Diseñar, instalar y validar un sistema piloto de riego subterráneo automatizado por gravedad para una parcela de <span class="text-solar-gold font-bold underline decoration-solar-gold decoration-2" id="objectiveHectaresText">100 m² (0.01 ha)</span> en el Sahel, utilizando tanques elevados de <span class="text-hydro-blue font-bold">1.000 L</span>, alimentación solar/eólica de baja potencia y control IoT para maximizar el ahorro hídrico por evaporación y asegurar la producción agrícola continua.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 Pillars of Scope Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Pillar 1 -->
+                <div class="glass-card p-6 rounded-2xl hover:border-solar-gold/50 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-solar-gold/10 border border-solar-gold/30 text-solar-gold flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-faucet-drip"></i>
+                        </div>
+                        <span class="text-xs font-bold text-solar-gold tracking-widest uppercase">Pilar 01</span>
+                        <h4 class="text-xl font-bold text-white mt-1 mb-3">Red Hidráulica por Gravedad</h4>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            Diseño de la red de riego subterráneo soterrada entre <strong>20 cm y 30 cm</strong> bajo tierra. Funcionamiento por gravedad alimentado por tanque elevado de 1.000 L, ajustado a emisores de baja presión para irrigar directo a la raíz.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-700/60 flex items-center text-xs font-semibold text-slate-400">
+                        <i class="fa-solid fa-circle-check text-agri-leaf mr-2"></i> Red Enterrada de Baja Presión
+                    </div>
+                </div>
+
+                <!-- Pillar 2 -->
+                <div class="glass-card p-6 rounded-2xl hover:border-hydro-blue/50 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-hydro-blue/10 border border-hydro-blue/30 text-hydro-blue flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                        <span class="text-xs font-bold text-hydro-blue tracking-widest uppercase">Pilar 02</span>
+                        <h4 class="text-xl font-bold text-white mt-1 mb-3">Control Inteligente con Arduino</h4>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            Unidad de control basada en Arduino (5V). Activa el riego en &lt; 5 segundos cuando la humedad baja del <strong>30%</strong>. Bloquea el riego automáticamente si la temperatura supera los <strong>30 °C</strong> o hay radiación solar intensa.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-700/60 flex items-center text-xs font-semibold text-slate-400">
+                        <i class="fa-solid fa-circle-check text-agri-leaf mr-2"></i> Bloqueo Anti-Evaporación &gt;30°C
+                    </div>
+                </div>
+
+                <!-- Pillar 3 -->
+                <div class="glass-card p-6 rounded-2xl hover:border-agri-leaf/50 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-agri-leaf/10 border border-agri-leaf/30 text-agri-leaf flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-bolt text-solar-gold"></i>
+                        </div>
+                        <span class="text-xs font-bold text-agri-leaf tracking-widest uppercase">Pilar 03</span>
+                        <h4 class="text-xl font-bold text-white mt-1 mb-3">Energía Híbrida Low-Cost</h4>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            Captación limpia mediante panel solar fotovoltaico y micro-aerogenerador eólico con batería de respaldo a 12V. Autonomía garantizada de 48 horas seguidas sin sol ni viento, con presupuesto de prototipo &lt; 50€.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-700/60 flex items-center text-xs font-semibold text-slate-400">
+                        <i class="fa-solid fa-circle-check text-agri-leaf mr-2"></i> Prototipo Funcional &lt; 50€
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ARCHITECTURE SCHEMATIC SECTION -->
+    <section id="architecture" class="py-16 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-hydro-blue px-3 py-1 rounded-full bg-hydro-blue/10 border border-hydro-blue/20">
+                    Esquema de Ingeniería
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-3">
+                    Arquitectura del Sistema SIRAS
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base mt-2">
+                    Haz clic en los nodos para inspeccionar los componentes del prototipo de Kilimagua.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <div class="lg:col-span-7 glass-panel p-6 rounded-2xl border border-slate-700">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-diagram-project text-solar-gold"></i>
+                        Flujo de Energía, Agua y Datos
+                    </h3>
+
+                    <div class="space-y-4">
+                        
+                        <!-- Step 1: Hybrid Renewable Power -->
+                        <div onclick="selectArchNode('hybrid')" id="archNode-hybrid" class="arch-node p-4 rounded-xl border border-solar-gold/40 bg-solar-gold/10 hover:bg-solar-gold/20 cursor-pointer transition-all flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-lg bg-solar-gold text-slate-950 font-extrabold flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm sm:text-base">1. Generación Híbrida (Solar + Eólica)</h4>
+                                    <p class="text-xs text-slate-300">Placa solar + Pequeño molino de viento (12V) con batería (48h autonomía)</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-solar-gold text-sm"></i>
+                        </div>
+
+                        <div class="flex justify-center text-slate-600 my-1"><i class="fa-solid fa-arrow-down"></i></div>
+
+                        <!-- Step 2: Gravity Water Tank -->
+                        <div onclick="selectArchNode('tank')" id="archNode-tank" class="arch-node p-4 rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-700/60 cursor-pointer transition-all flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-lg bg-hydro-blue text-white font-extrabold flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-box-tissue"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm sm:text-base">2. Tanque Elevado de 1.000 L (Gravedad)</h4>
+                                    <p class="text-xs text-slate-300">Depósito a altura calculada para distribución a baja presión sin bombas de consumo elevado</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-500 text-sm"></i>
+                        </div>
+
+                        <div class="flex justify-center text-slate-600 my-1"><i class="fa-solid fa-arrow-down"></i></div>
+
+                        <!-- Step 3: Arduino & IoT Sensors -->
+                        <div onclick="selectArchNode('arduino')" id="archNode-arduino" class="arch-node p-4 rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-700/60 cursor-pointer transition-all flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-lg bg-agri-green text-slate-950 font-extrabold flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-microchip"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm sm:text-base">3. Controlador Arduino (5V) & Sensores IoT</h4>
+                                    <p class="text-xs text-slate-300">Sensor de humedad de suelo, sensor de temp/luz y módulo de comunicación</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-500 text-sm"></i>
+                        </div>
+
+                        <div class="flex justify-center text-slate-600 my-1"><i class="fa-solid fa-arrow-down"></i></div>
+
+                        <!-- Step 4: Solenoid Valves -->
+                        <div onclick="selectArchNode('valves')" id="archNode-valves" class="arch-node p-4 rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-700/60 cursor-pointer transition-all flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-lg bg-amber-500 text-slate-950 font-extrabold flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-sliders"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm sm:text-base">4. Electroválvulas de Bajo Consumo</h4>
+                                    <p class="text-xs text-slate-300">Conmutación rápida en &lt; 5 segundos tras orden del Arduino</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-500 text-sm"></i>
+                        </div>
+
+                        <div class="flex justify-center text-slate-600 my-1"><i class="fa-solid fa-arrow-down"></i></div>
+
+                        <!-- Step 5: Subsurface Pipe Network -->
+                        <div onclick="selectArchNode('sdi')" id="archNode-sdi" class="arch-node p-4 rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-700/60 cursor-pointer transition-all flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-lg bg-sahel-terracotta text-white font-extrabold flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-border-all"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm sm:text-base">5. Red de Tuberías Enterradas (20 - 30 cm)</h4>
+                                    <p class="text-xs text-slate-300">Goteo directo a las raíces en la parcela piloto de 100 m²</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-500 text-sm"></i>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Detail Panel -->
+                <div class="lg:col-span-5 glass-panel p-6 rounded-2xl border border-slate-700 sticky top-28" id="archDetailPanel">
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- TELEMETRY & CONTROLS DASHBOARD -->
+    <section id="iot-dashboard" class="py-16 bg-slate-900/80 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold uppercase tracking-widest text-agri-leaf px-3 py-1 rounded-full bg-agri-green/10 border border-agri-green/20">
+                            Firebase Realtime Ready
+                        </span>
+                        <span class="text-xs text-slate-400 flex items-center gap-1.5" id="firebaseConnStatus">
+                            <span class="w-2.5 h-2.5 rounded-full bg-solar-gold animate-ping"></span>
+                            Modo Local / Esperando Firebase
+                        </span>
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-white mt-2">
+                        Dashboard telemétrico de control SIRAS
+                    </h2>
+                    <p class="text-slate-400 text-sm">
+                        Monitoreo en tiempo real de la parcela piloto (100 m²) y control remoto de actuadores.
+                    </p>
+                </div>
+
+                <!-- Mode Selector Controls -->
+                <div class="flex items-center gap-3 bg-slate-800 p-1.5 rounded-xl border border-slate-700 shrink-0">
+                    <button onclick="setSystemMode('auto')" id="modeBtnAuto" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-agri-green text-slate-950 shadow-md">
+                        <i class="fa-solid fa-robot mr-1"></i> Modo Automático Arduino
+                    </button>
+                    <button onclick="setSystemMode('manual')" id="modeBtnManual" class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-hand mr-1"></i> Control Manual Demo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Telemetry Metrics Grid Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+                
+                <!-- Moisture -->
+                <div class="glass-card p-4 rounded-xl border border-slate-700">
+                    <div class="text-slate-400 text-xs font-medium flex items-center justify-between">
+                        <span>Humedad Suelo</span>
+                        <i class="fa-solid fa-water text-hydro-blue"></i>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-white mt-2" id="valMoist">26.4 %</div>
+                    <div class="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+                        <span>Umbral Riego: <strong>30%</strong></span>
+                        <span id="badgeMoist" class="text-solar-gold font-bold">&lt; 30% (Riego Requerido)</span>
+                    </div>
+                </div>
+
+                <!-- Temp & Protection Status -->
+                <div class="glass-card p-4 rounded-xl border border-slate-700">
+                    <div class="text-slate-400 text-xs font-medium flex items-center justify-between">
+                        <span>Temperatura Aire</span>
+                        <i class="fa-solid fa-temperature-high text-sahel-clay"></i>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-white mt-2" id="valTemp">28.2 °C</div>
+                    <div class="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+                        <span>Límite Máx: <strong>30 °C</strong></span>
+                        <span id="badgeTemp" class="text-agri-leaf font-bold">Permitido</span>
+                    </div>
+                </div>
+
+                <!-- Hybrid Energy / Battery -->
+                <div class="glass-card p-4 rounded-xl border border-slate-700">
+                    <div class="text-slate-400 text-xs font-medium flex items-center justify-between">
+                        <span>Batería Híbrida 12V</span>
+                        <i class="fa-solid fa-bolt text-solar-gold"></i>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-white mt-2" id="valBattery">94 %</div>
+                    <div class="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+                        <span>Autonomía</span>
+                        <span class="text-solar-gold font-bold">~44 horas restantes</span>
+                    </div>
+                </div>
+
+                <!-- Solar / Wind Power -->
+                <div class="glass-card p-4 rounded-xl border border-slate-700">
+                    <div class="text-slate-400 text-xs font-medium flex items-center justify-between">
+                        <span>Entrada Renovable</span>
+                        <i class="fa-solid fa-wind text-sky-400"></i>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-white mt-2" id="valRenewable">Solar + Eólica</div>
+                    <div class="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+                        <span>Tensión Sistema</span>
+                        <span class="text-agri-leaf font-bold">12.6 V DC</span>
+                    </div>
+                </div>
+
+                <!-- Tank Level (1000L) -->
+                <div class="glass-card p-4 rounded-xl border border-slate-700 col-span-2 md:col-span-4 lg:col-span-1">
+                    <div class="text-slate-400 text-xs font-medium flex items-center justify-between">
+                        <span>Tanque 1.000 L Gravedad</span>
+                        <i class="fa-solid fa-database text-hydro-blue"></i>
+                    </div>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-xl font-bold text-white" id="valPumpStatus">ESPERANDO</span>
+                        <span class="text-sm px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-bold border border-sky-500/30" id="valTankLevel">850 L (85%)</span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
+                        <div class="bg-hydro-blue h-full transition-all duration-500" id="tankProgressBar" style="width: 85%;"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Chart & Actuators Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <div class="lg:col-span-8 glass-panel p-6 rounded-2xl border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-agri-leaf"></i>
+                            Evolución de Humedad del Suelo y Temperatura
+                        </h3>
+                        <div class="text-xs text-slate-400 hidden sm:block">
+                            Umbral Mínimo: <strong class="text-amber-400">30%</strong> | Temp Máx: <strong class="text-red-400">30°C</strong>
+                        </div>
+                    </div>
+                    <div class="h-64 sm:h-80 w-full">
+                        <canvas id="telemetryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- MANUAL ACTUATOR CONTROLS -->
+                <div class="lg:col-span-4 glass-panel p-6 rounded-2xl border border-slate-700 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-solar-gold"></i>
+                            Control de Actuadores
+                        </h3>
+                        <p class="text-xs text-slate-400 mb-4">
+                            Los cambios de estos botones se sincronizan en tiempo real con Firebase Realtime Database.
+                        </p>
+
+                        <div id="manualControlsBox" class="p-4 rounded-xl bg-slate-800/80 border border-slate-700 space-y-3 opacity-60 pointer-events-none transition-all">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-semibold text-slate-200 block">Electroválvula Sector A</span>
+                                    <span class="text-[10px] text-slate-400">Tubería enterrada a 25 cm</span>
+                                </div>
+                                <button onclick="toggleValve('A')" id="btnValveA" class="px-3.5 py-1.5 rounded bg-slate-700 text-xs font-bold text-slate-300 hover:bg-slate-600 transition-all">
+                                    CERRADA
+                                </button>
+                            </div>
+
+                            <div class="flex items-center justify-between border-t border-slate-700/60 pt-3">
+                                <div>
+                                    <span class="text-xs font-semibold text-slate-200 block">Electroválvula Sector B</span>
+                                    <span class="text-[10px] text-slate-400">Tubería enterrada a 25 cm</span>
+                                </div>
+                                <button onclick="toggleValve('B')" id="btnValveB" class="px-3.5 py-1.5 rounded bg-slate-700 text-xs font-bold text-slate-300 hover:bg-slate-600 transition-all">
+                                    CERRADA
+                                </button>
+                            </div>
+
+                            <div class="flex items-center justify-between border-t border-slate-700/60 pt-3">
+                                <div>
+                                    <span class="text-xs font-semibold text-slate-200 block">Válvula Principal (Tanque 1000L)</span>
+                                    <span class="text-[10px] text-slate-400">Corte general por gravedad</span>
+                                </div>
+                                <button onclick="toggleMainValve()" id="btnMainValve" class="px-3.5 py-1.5 rounded bg-slate-700 text-xs font-bold text-slate-300 hover:bg-slate-600 transition-all">
+                                    CERRADA
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="text-[11px] text-slate-400 mt-2 italic" id="manualNotice">
+                            * Active el "Control Manual Demo" para pulsar y probar los botones manualmente.
+                        </p>
+                    </div>
+
+                    <!-- Telemetry Event Log Stream -->
+                    <div class="mt-6">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Consola de Eventos del Arduino</span>
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px] font-mono h-28 overflow-y-auto space-y-1.5 text-slate-300" id="iotConsoleLog">
+                            <div><span class="text-agri-leaf">[08:00]</span> Arduino iniciado. Leyendo sensores a 5V...</div>
+                            <div><span class="text-solar-gold">[08:02]</span> Batería híbrida al 94%. Energía limpia OK.</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- WATER SAVINGS & IMPACT CALCULATOR -->
+    <section id="calculator" class="py-16 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-solar-gold px-3 py-1 rounded-full bg-solar-gold/10 border border-solar-gold/20">
+                    Análisis Económico y Agronómico
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-3">
+                    Calculadora de Ahorro e Inversión SIRAS
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base mt-2">
+                    Ajuste la superficie agrícola para estimar el porcentaje de ahorro de agua (&ge; 35%) y los costes de material.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                
+                <div class="lg:col-span-5 glass-panel p-6 sm:p-8 rounded-2xl border border-slate-700 flex flex-col justify-between">
+                    <div class="space-y-6">
+                        <h3 class="text-base font-bold text-white uppercase tracking-wider border-b border-slate-700 pb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-agri-leaf"></i> Parámetros del Cultivo
+                        </h3>
+
+                        <!-- Hectares / m2 Slider Input -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs sm:text-sm font-semibold text-slate-200">Superficie de Parcela (m²):</label>
+                                <span class="text-lg font-bold text-solar-gold bg-solar-gold/10 px-3 py-1 rounded-lg border border-solar-gold/30" id="calcAreaVal">100 m² (0.01 Ha)</span>
+                            </div>
+                            <input type="range" id="calcAreaSlider" min="50" max="5000" step="50" value="100" oninput="updateCalculator()" class="w-full accent-solar-gold bg-slate-700 h-2 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                <span>50 m²</span>
+                                <span>100 m² (Piloto Sahel)</span>
+                                <span>5.000 m²</span>
+                            </div>
+                        </div>
+
+                        <!-- Baseline Method Selection -->
+                        <div>
+                            <label class="text-xs sm:text-sm font-semibold text-slate-200 block mb-2">Método Tradicional Comparado:</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center p-3 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer hover:border-slate-500">
+                                    <input type="radio" name="calcBaseline" value="manguera" checked onchange="updateCalculator()" class="accent-solar-gold mr-2">
+                                    <span class="text-xs font-semibold text-slate-200">Manguera Manual</span>
+                                </label>
+                                <label class="flex items-center p-3 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer hover:border-slate-500">
+                                    <input type="radio" name="calcBaseline" value="aspersion" onchange="updateCalculator()" class="accent-solar-gold mr-2">
+                                    <span class="text-xs font-semibold text-slate-200">Aspersión Superficial</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-700/60 text-xs text-slate-400 flex items-center justify-between">
+                        <span>Coste Prototipo Kilimagua: <strong>&lt; 50€</strong></span>
+                        <span class="text-agri-leaf font-semibold"><i class="fa-solid fa-leaf mr-1"></i> Sin pérdida por evaporación</span>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 glass-panel p-6 sm:p-8 rounded-2xl border border-slate-700 bg-slate-900/90 flex flex-col justify-between">
+                    
+                    <div>
+                        <h3 class="text-base font-bold text-white uppercase tracking-wider border-b border-slate-700 pb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-hydro-blue"></i> Resultados de Ahorro y Presupuesto
+                        </h3>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                            
+                            <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700">
+                                <span class="text-xs text-slate-400 font-semibold uppercase">Consumo Tradicional Estimado</span>
+                                <div class="text-2xl sm:text-3xl font-extrabold text-sahel-clay mt-1" id="resTraditionalVolume">400 L / día</div>
+                                <p class="text-[11px] text-slate-400 mt-1">Elevadas pérdidas por calor y evaporación.</p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-agri-green/10 border border-agri-green/40">
+                                <span class="text-xs text-agri-leaf font-semibold uppercase">Consumo SIRAS (Goteo Subterráneo)</span>
+                                <div class="text-2xl sm:text-3xl font-extrabold text-agri-leaf mt-1" id="resAquaVolume">240 L / día</div>
+                                <p class="text-[11px] text-agri-leaf/80 mt-1">Goteo directo a la raíz (20-30 cm).</p>
+                            </div>
+
+                        </div>
+
+                        <!-- Big Water Saved Banner -->
+                        <div class="mt-6 p-5 rounded-2xl bg-gradient-to-r from-hydro-blue/20 via-sky-500/10 to-agri-green/20 border border-hydro-blue/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-sky-300">Garantía del Project Charter</span>
+                                <div class="text-3xl sm:text-4xl font-black text-white mt-0.5" id="resSavedVolume">160 Litros / día ahorrados</div>
+                                <p class="text-xs text-slate-300 mt-1">Reducción efectiva frente al consumo por manguera.</p>
+                            </div>
+                            <div class="px-5 py-3 rounded-xl bg-agri-green text-slate-950 font-black text-2xl sm:text-3xl shrink-0 shadow-lg" id="resPercentageSaved">
+                                -40 %
+                            </div>
+                        </div>
+
+                        <!-- Cost Estimation Card -->
+                        <div class="grid grid-cols-2 gap-4 mt-6">
+                            <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700">
+                                <span class="text-[11px] text-slate-400 block font-medium">Coste Estimado Instalación (2€-3€/m²)</span>
+                                <span class="text-xl font-extrabold text-solar-gold mt-1 block" id="resCostInstall">200€ - 300€</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700">
+                                <span class="text-[11px] text-slate-400 block font-medium">Respuesta Automática del Riego</span>
+                                <span class="text-xl font-extrabold text-agri-leaf mt-1 block">&lt; 5 Segundos</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-6 text-[11px] text-slate-400 italic">
+                        * Especificaciones verificadas según el Project Charter redactado para la asignatura del Departament d'Enginyeria de Projectes i de la Construcció (UPC).
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- KILIMAGUA & CONTEXT SECTION -->
+    <section id="context" class="py-16 bg-slate-900/60 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <span class="text-xs font-bold uppercase tracking-widest text-sahel-sand px-3 py-1 rounded-full bg-sahel-clay/20 border border-sahel-clay/30">
+                    Empresa Kilimagua • Terrassa / Sahel
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-3">
+                    Justificación y Solución en el Sahel
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base mt-2">
+                    Desarrollo en apoyo a los Objetivos de Desarrollo Sostenible (ODS) de la Agenda 2030.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                
+                <div class="glass-panel p-6 rounded-2xl border border-red-500/30 bg-gradient-to-b from-red-950/20 to-slate-900">
+                    <h3 class="font-bold text-red-400 text-lg mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        El Desafío en Zonas Áridas
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+                        En el Sahel y regiones con escasez severa de recursos, el riego tradicional por manguera provoca pérdidas masivas por evaporación, desarrollo acelerado de maleza y desperdicio de agua antes de que alcance la raíz.
+                    </p>
+                    <ul class="space-y-2 text-xs text-slate-400">
+                        <li class="flex items-center"><i class="fa-solid fa-xmark text-red-400 mr-2"></i> Alta vulnerabilidad a las temperaturas &gt; 30 °C.</li>
+                        <li class="flex items-center"><i class="fa-solid fa-xmark text-red-400 mr-2"></i> Redes eléctricas inestables que imposibilitan bombas de gran potencia.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border border-agri-green/40 bg-gradient-to-b from-agri-green/10 to-slate-900">
+                    <h3 class="font-bold text-agri-leaf text-lg mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        La Solución de Kilimagua (SIRAS)
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+                        Tuberías enterradas entre 20 y 30 cm con caudal por gravedad desde un tanque de 1.000 L. Un microcontrolador Arduino administra la apertura en función de la humedad (&lt;30%) y cancela el riego si hace demasiado calor.
+                    </p>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center"><i class="fa-solid fa-check text-agri-leaf mr-2"></i> Ahorro garantizado de al menos un 35% de agua.</li>
+                        <li class="flex items-center"><i class="fa-solid fa-check text-agri-leaf mr-2"></i> Autonomía de 48 horas mediante energía solar y eólica limpia.</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER SECTION -->
+    <footer class="py-12 bg-slate-950 text-slate-400 text-xs border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center border-b border-slate-800 pb-8 mb-8">
+                
+                <div>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="text-lg font-bold text-white" id="footerBrand">SIRAS | Kilimagua</span>
+                        <span class="px-2 py-0.5 rounded bg-solar-gold/20 text-solar-gold font-semibold text-[10px]">UPC BarcelonaTech</span>
+                    </div>
+                    <p class="text-slate-400 text-xs" id="footerDesc">
+                        "Eficiencia que fluye desde la raíz." Proyecto universitario de riego automático subterráneo de bajo coste.
+                    </p>
+                </div>
+
+                <div class="space-y-1 text-center md:text-left">
+                    <div><strong class="text-slate-200">Universidad:</strong> <span id="footerUniv">UPC BarcelonaTech</span></div>
+                    <div><strong class="text-slate-200">Departamento:</strong> <span id="footerDept">Enginyeria de Projectes i de la Construcció</span></div>
+                    <div><strong class="text-slate-200">Tutora:</strong> <span id="footerAdvisor">Elisabet Amorós Casahuga</span></div>
+                    <div><strong class="text-slate-200">Contacto:</strong> info@kilimagua.org | +34 999 99 99 99</div>
+                </div>
+
+                <div class="text-center md:text-right">
+                    <button onclick="openConfigModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs transition-all">
+                        <i class="fa-solid fa-pen-to-square mr-1 text-solar-gold"></i> Ver Integrantes
+                    </button>
+                    <div class="mt-2 text-[11px] text-slate-400" id="footerTeamSummary">
+                        Equipo: Ariadna C., Sergi C., Marc G., Ruben L., Judit S., Melanie S., Joel S.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-400 gap-2">
+                <div>&copy; 2026 Kilimagua - Universitat Politècnica de Catalunya. Project Charter Validado.</div>
+                <div class="flex space-x-4">
+                    <a href="#hero" class="hover:text-solar-gold transition-colors">Volver arriba</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL 1: PROJECT CONFIGURATION -->
+    <div id="configModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl max-w-lg w-full border border-slate-700 shadow-2xl relative">
+            <button onclick="closeConfigModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h3 class="text-xl font-bold text-white mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-solar-gold"></i>
+                Datos del Proyecto (Project Charter)
+            </h3>
+            <p class="text-xs text-slate-400 mb-6">
+                Información institucional del equipo Kilimagua y de la Universitat Politècnica de Catalunya.
+            </p>
+
+            <form onsubmit="saveProjectConfig(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs font-semibold text-slate-300 block mb-1">Nombre del Proyecto / Empresa</label>
+                    <input type="text" id="inputProjName" value="SIRAS (Kilimagua)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:ring-2 focus:ring-solar-gold focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-300 block mb-1">Universidad / Institución</label>
+                    <input type="text" id="inputUniv" value="Universitat Politècnica de Catalunya (UPC)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:ring-2 focus:ring-solar-gold focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1">Departamento</label>
+                        <input type="text" id="inputDept" value="Enginyeria de Projectes i de la Construcció" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:ring-2 focus:ring-solar-gold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1">Tutora</label>
+                        <input type="text" id="inputAdvisor" value="Elisabet Amorós Casahuga" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:ring-2 focus:ring-solar-gold focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-300 block mb-1">Integrantes del Equipo Kilimagua</label>
+                    <input type="text" id="inputTeam" value="Ariadna Camps, Sergi Carmona, Marc Gobern, Ruben Lozano, Judit Sabidó, Melanie Silberman, Joel Silva" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:ring-2 focus:ring-solar-gold focus:outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeConfigModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-solar-gold text-slate-950 font-bold text-xs hover:bg-amber-400 transition-all shadow-md">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: PROJECT CHARTER SUMMARY -->
+    <div id="exportModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl max-w-2xl w-full border border-slate-700 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeExportModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div id="printableReport">
+                <div class="border-b border-slate-700 pb-4 mb-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-black text-white" id="modalReportTitle">SIRAS - Kilimagua</h3>
+                        <p class="text-xs text-solar-gold font-semibold" id="modalReportSub">Acta de Constitución del Proyecto (Project Charter)</p>
+                    </div>
+                    <div class="text-right text-xs text-slate-400">
+                        <div>Sede: Terrassa (UPC TR1)</div>
+                        <div class="font-bold text-agri-leaf">Estado: Validado</div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-xs text-slate-300">
+                    <div class="p-3 bg-slate-800/80 rounded-xl">
+                        <strong class="text-slate-200 block text-xs uppercase mb-1">Estructura Organizativa:</strong>
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div><strong>Project Management:</strong> Joel Silva, Marc Gobern & Melanie Silberman</div>
+                            <div><strong>Ingeniería y Suministros:</strong> Ruben Lozano & Sergi Carmona</div>
+                            <div><strong>Documentación:</strong> Judit Sabidó & Ariadna Camps</div>
+                            <div><strong>Tutora:</strong> Elisabet Amorós Casahuga</div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-800/80 rounded-xl">
+                        <strong class="text-slate-200 block text-xs uppercase mb-1">Objeto del Proyecto:</strong>
+                        <p class="leading-relaxed">
+                            Diseñar, instalar y validar un sistema piloto de riego subterráneo automatizado por gravedad para una parcela de 100 m² (0.01 ha) en el Sahel, utilizando tanques elevados de 1.000 L, alimentación solar/eólica de baja potencia y control IoT para maximizar el ahorro hídrico por evaporación.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        <div class="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                            <span class="text-[10px] text-slate-400 block">Superficie Piloto</span>
+                            <span class="text-lg font-bold text-solar-gold">100 m²</span>
+                        </div>
+                        <div class="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                            <span class="text-[10px] text-slate-400 block">Ahorro Mínimo</span>
+                            <span class="text-lg font-bold text-agri-leaf">&ge; 35%</span>
+                        </div>
+                        <div class="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                            <span class="text-[10px] text-slate-400 block">Prototipo</span>
+                            <span class="text-lg font-bold text-sky-400">&lt; 50€</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-700 flex justify-end space-x-3">
+                <button onclick="closeExportModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold">
+                    Cerrar
+                </button>
+                <button onclick="copyReportText()" class="px-4 py-2 rounded-lg bg-slate-700 text-white text-xs font-semibold hover:bg-slate-600 transition-all">
+                    <i class="fa-solid fa-copy mr-1"></i> Copiar Texto
+                </button>
+                <button onclick="window.print()" class="px-5 py-2 rounded-lg bg-gradient-to-r from-hydro-blue to-hydro-deep text-white font-bold text-xs hover:shadow-lg transition-all">
+                    <i class="fa-solid fa-print mr-1"></i> Imprimir / PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION FLOATER -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 glass-panel border border-solar-gold/40 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-solar-gold text-lg" id="toastIcon"></i>
+        <span class="text-xs font-semibold text-white" id="toastMessage">Notificación</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC & FIREBASE REALTIME DATABASE INTEGRATION -->
+    <script>
+        // =========================================================================
+        // 1. CONFIGURACIÓN DE FIREBASE REALTIME DATABASE
+        // =========================================================================
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_PROYECTO.firebaseapp.com",
+            databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
+            projectId: "TU_PROYECTO",
+            storageBucket: "TU_PROYECTO.appspot.com",
+            messagingSenderId: "TU_SENDER_ID",
+            appId: "TU_APP_ID"
+        };
+
+        let db = null;
+        let firebaseConnected = false;
+
+        function initFirebase() {
+            try {
+                if (firebaseConfig.apiKey !== "TU_API_KEY") {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.database();
+                    firebaseConnected = true;
+                    
+                    document.getElementById('firebaseConnStatus').innerHTML = `
+                        <span class="w-2.5 h-2.5 rounded-full bg-agri-green"></span>
+                        Conectado a Firebase Realtime
+                    `;
+                    logConsoleEvent("Conectado con éxito a Firebase Realtime Database.", "agri");
+                    
+                    listenFirebaseUpdates();
+                } else {
+                    console.log("Firebase no configurado. Ejecutando en modo simulación/demo local.");
+                }
+            } catch (err) {
+                console.error("Error al inicializar Firebase:", err);
+            }
+        }
+
+        function pushFirebaseState(path, value) {
+            if (firebaseConnected && db) {
+                db.ref('siras/' + path).set(value)
+                    .then(() => console.log(`Firebase actualizado [siras/${path}]:`, value))
+                    .catch(err => console.error("Error al escribir en Firebase:", err));
+            }
+        }
+
+        function listenFirebaseUpdates() {
+            if (!firebaseConnected || !db) return;
+
+            db.ref('siras/actuadores').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    if (data.valvulaA !== undefined) {
+                        valveAOpen = data.valvulaA;
+                        updateValveUI('A', valveAOpen);
+                    }
+                    if (data.valvulaB !== undefined) {
+                        valveBOpen = data.valvulaB;
+                        updateValveUI('B', valveBOpen);
+                    }
+                    if (data.valvulaPrincipal !== undefined) {
+                        mainValveOpen = data.valvulaPrincipal;
+                        updateMainValveUI(mainValveOpen);
+                    }
+                    if (data.modo !== undefined) {
+                        systemMode = data.modo;
+                        updateModeUI(systemMode);
+                    }
+                }
+            });
+
+            db.ref('siras/sensores').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    if (data.humedad !== undefined) telemetryData.moist = data.humedad;
+                    if (data.temperatura !== undefined) telemetryData.temp = data.temperatura;
+                    if (data.bateria !== undefined) telemetryData.battery = data.bateria;
+                    updateDashboardUI();
+                }
+            });
+        }
+
+        // =========================================================================
+        // 2. ESTADO GENERAL DE LA APLICACIÓN
+        // =========================================================================
+        const projectData = {
+            name: "SIRAS (Kilimagua)",
+            university: "Universitat Politècnica de Catalunya (UPC)",
+            department: "Enginyeria de Projectes i de la Construcció",
+            advisor: "Elisabet Amorós Casahuga",
+            team: "Ariadna Camps, Sergi Carmona, Marc Gobern, Ruben Lozano, Judit Sabidó, Melanie Silberman, Joel Silva",
+            hectares: 0.01 // 100 m2
+        };
+
+        let systemMode = 'auto'; // 'auto' o 'manual'
+        let valveAOpen = false;
+        let valveBOpen = false;
+        let mainValveOpen = false;
+
+        let telemetryData = {
+            moist: 26.4,
+            temp: 28.2,
+            battery: 94,
+            tankLitres: 850
+        };
+
+        const archNodes = {
+            hybrid: {
+                title: "Sistema Híbrido Renovable (Solar + Eólica)",
+                icon: "fa-bolt",
+                color: "text-solar-gold",
+                specs: [
+                    { label: "Fuentes Limpias", val: "Placa Fotovoltaica + Pequeño Molino Eólico" },
+                    { label: "Tensión de Trabajo", val: "12V DC (Seguro y de ultra bajo consumo)" },
+                    { label: "Batería de Respaldo", val: "Batería 12V con 48 horas de autonomía" },
+                    { label: "Alimentación Arduino", val: "Regulador a 5V constante" }
+                ],
+                desc: "Captación híbrida de baja potencia para zonas aisladas. Garantiza que el Arduino y los sensores sigan midiendo e irrigando durante 48 horas continuas sin sol ni viento."
+            },
+            tank: {
+                title: "Tanque Elevado de 1.000 L (Riego por Gravedad)",
+                icon: "fa-box-tissue",
+                color: "text-hydro-blue",
+                specs: [
+                    { label: "Capacidad Depósito", val: "1.000 Litros" },
+                    { label: "Tipo de Distribución", val: "Gravedad a baja presión" },
+                    { label: "Consumo Energético", val: "0 Watt en bombeo de impulsión" },
+                    { label: "Diseño Estructural", val: "Soporte elevado calculado según cultivo" }
+                ],
+                desc: "El depósito elevado permite irrigar la parcela sin necesitar bombas de agua de alto consumo. El agua fluye de forma natural por gravedad directo a los emisores subterráneos."
+            },
+            arduino: {
+                title: "Controlador Arduino (5V) & Sensores IoT",
+                icon: "fa-microchip",
+                color: "text-agri-leaf",
+                specs: [
+                    { label: "Microcontrolador", val: "Arduino Uno / Nano a 5V" },
+                    { label: "Umbral Humedad", val: "Activación automática si Humedad < 30%" },
+                    { label: "Bloqueo por Calor", val: "Inhibe riego si Temperatura > 30 °C" },
+                    { label: "Tiempo de Respuesta", val: "< 5 segundos para abrir la electroválvula" }
+                ],
+                desc: "Cerebro electrónico de bajo coste (<50€). Lee la humedad y la temperatura de la tierra. Si detecta calor excesivo (>30°C) frena el riego para evitar el impacto térmico y la evaporación."
+            },
+            valves: {
+                title: "Electroválvulas de Bajo Consumo",
+                icon: "fa-sliders",
+                color: "text-amber-500",
+                specs: [
+                    { label: "Tensión Operativa", val: "12V DC" },
+                    { label: "Sectores", val: "Sector A y Sector B de la parcela" },
+                    { label: "Conmutación", val: "Respuesta en menos de 5 segundos" },
+                    { label: "Consumo en Espera", val: "0 mA" }
+                ],
+                desc: "Válvulas selenoides conectadas a las salidas de relé/transistor del Arduino. Permiten el paso de agua al sector que necesite humedad."
+            },
+            sdi: {
+                title: "Red de Tuberías Subterráneas (20 cm - 30 cm)",
+                icon: "fa-border-all",
+                color: "text-sahel-terracotta",
+                specs: [
+                    { label: "Profundidad Entierro", val: "20 cm a 30 cm bajo el nivel del suelo" },
+                    { label: "Superficie Piloto", val: "100 m² (0.01 Hectárea)" },
+                    { label: "Ahorro de Agua", val: "≥ 35% frente al riego tradicional" },
+                    { label: "Coste de Instalación", val: "2€ - 3€ por m² (200€ - 300€ para 100m²)" }
+                ],
+                desc: "Tuberías enterradas que entregan el agua directo a las raíces de las plantas, cancelando la evaporación por radiación solar en la superficie."
+            }
+        };
+
+        // =========================================================================
+        // 3. GRÁFICO DE TELEMETRÍA (Chart.js)
+        // =========================================================================
+        let chartInstance = null;
+
+        function initChart() {
+            const ctx = document.getElementById('telemetryChart').getContext('2d');
+            const hours = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: hours,
+                    datasets: [
+                        {
+                            label: 'Humedad Suelo (%) - Umbral < 30%',
+                            data: [38, 35, 32, 28, 25, 34, 31, 29],
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Temperatura Aire (°C) - Bloqueo > 30°C',
+                            data: [22, 20, 21, 27, 33, 31, 26, 23],
+                            borderColor: '#C86D51',
+                            backgroundColor: 'transparent',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            borderDash: [4, 4]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94A3B8', font: { family: 'Inter', size: 11 } } }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94A3B8' } },
+                        y: { min: 10, max: 50, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94A3B8' } }
+                    }
+                }
+            });
+        }
+
+        function startTelemetryLoop() {
+            setInterval(() => {
+                if (!firebaseConnected && systemMode === 'auto') {
+                    telemetryData.moist = +(Math.max(18, Math.min(42, telemetryData.moist + (Math.random() * 0.8 - 0.4))).toFixed(1));
+                    telemetryData.temp = +(Math.max(20, Math.min(36, telemetryData.temp + (Math.random() * 0.4 - 0.2))).toFixed(1));
+
+                    if (telemetryData.temp > 30) {
+                        valveAOpen = false;
+                        valveBOpen = false;
+                        logConsoleEvent("SEGURIDAD: Temp > 30°C. Riego bloqueado automáticamente.", "solar");
+                    } else if (telemetryData.moist < 30) {
+                        valveAOpen = true;
+                        logConsoleEvent("Humedad < 30%. Arduino abriendo electroválvula en < 5s.", "agri");
+                    } else {
+                        valveAOpen = false;
+                    }
+                }
+                updateDashboardUI();
+            }, 3000);
+        }
+
+        function updateDashboardUI() {
+            document.getElementById('valMoist').innerText = telemetryData.moist + ' %';
+            document.getElementById('valTemp').innerText = telemetryData.temp + ' °C';
+            document.getElementById('valBattery').innerText = telemetryData.battery + ' %';
+
+            const bMoist = document.getElementById('badgeMoist');
+            if (telemetryData.moist < 30) {
+                bMoist.innerText = "< 30% (Riego Requerido)";
+                bMoist.className = "text-amber-400 font-bold";
+            } else {
+                bMoist.innerText = "Óptimo (>30%)";
+                bMoist.className = "text-agri-leaf font-bold";
+            }
+
+            const bTemp = document.getElementById('badgeTemp');
+            if (telemetryData.temp > 30) {
+                bTemp.innerText = "BLOQUEADO (> 30°C)";
+                bTemp.className = "text-red-400 font-bold";
+            } else {
+                bTemp.innerText = "Permitido (< 30°C)";
+                bTemp.className = "text-agri-leaf font-bold";
+            }
+
+            const pumpEl = document.getElementById('valPumpStatus');
+            if (valveAOpen || valveBOpen || mainValveOpen) {
+                pumpEl.innerText = "REGANDO";
+                pumpEl.className = "text-xl font-bold text-agri-leaf animate-pulse";
+            } else {
+                pumpEl.innerText = "EN ESPERA";
+                pumpEl.className = "text-xl font-bold text-slate-400";
+            }
+        }
+
+        // =========================================================================
+        // 4. CONTROL DE MODOS Y BOTONES
+        // =========================================================================
+        function setSystemMode(mode) {
+            systemMode = mode;
+            updateModeUI(mode);
+            pushFirebaseState('actuadores/modo', mode);
+        }
+
+        function updateModeUI(mode) {
+            const btnAuto = document.getElementById('modeBtnAuto');
+            const btnManual = document.getElementById('modeBtnManual');
+            const manualBox = document.getElementById('manualControlsBox');
+
+            if (mode === 'auto') {
+                btnAuto.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-agri-green text-slate-950 shadow-md";
+                btnManual.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white";
+                manualBox.classList.add('opacity-60', 'pointer-events-none');
+                logConsoleEvent("Modo cambiado a AUTOMÁTICO (Arduino activo).", "agri");
+                showToast("Modo Automático Activado");
+            } else {
+                btnManual.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-solar-gold text-slate-950 shadow-md";
+                btnAuto.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white";
+                manualBox.classList.remove('opacity-60', 'pointer-events-none');
+                logConsoleEvent("Modo cambiado a CONTROL MANUAL DEMO.", "solar");
+                showToast("Modo Manual Demo Activado");
+            }
+        }
+
+        function toggleValve(sector) {
+            if (sector === 'A') {
+                valveAOpen = !valveAOpen;
+                updateValveUI('A', valveAOpen);
+                pushFirebaseState('actuadores/valvulaA', valveAOpen);
+            } else {
+                valveBOpen = !valveBOpen;
+                updateValveUI('B', valveBOpen);
+                pushFirebaseState('actuadores/valvulaB', valveBOpen);
+            }
+            updateDashboardUI();
+        }
+
+        function updateValveUI(sector, isOpen) {
+            const btn = document.getElementById(`btnValve${sector}`);
+            if (btn) {
+                btn.innerText = isOpen ? "ABIERTA" : "CERRADA";
+                btn.className = isOpen ? "px-3.5 py-1.5 rounded bg-agri-green text-xs font-bold text-slate-950" : "px-3.5 py-1.5 rounded bg-slate-700 text-xs font-bold text-slate-300";
+            }
+            logConsoleEvent(`Electroválvula Sector ${sector}: ${isOpen ? "ABIERTA" : "CERRADA"}`, "hydro");
+        }
+
+        function toggleMainValve() {
+            mainValveOpen = !mainValveOpen;
+            updateMainValveUI(mainValveOpen);
+            pushFirebaseState('actuadores/valvulaPrincipal', mainValveOpen);
+            updateDashboardUI();
+        }
+
+        function updateMainValveUI(isOpen) {
+            const btn = document.getElementById('btnMainValve');
+            if (btn) {
+                btn.innerText = isOpen ? "ABIERTA" : "CERRADA";
+                btn.className = isOpen ? "px-3.5 py-1.5 rounded bg-hydro-blue text-xs font-bold text-white" : "px-3.5 py-1.5 rounded bg-slate-700 text-xs font-bold text-slate-300";
+            }
+            logConsoleEvent(`Válvula Principal Depósito 1000L: ${isOpen ? "ABIERTA" : "CERRADA"}`, "hydro");
+        }
+
+        function logConsoleEvent(msg, type) {
+            const logBox = document.getElementById('iotConsoleLog');
+            if (!logBox) return;
+
+            const timeStr = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            let colorClass = "text-slate-300";
+            if (type === "hydro") colorClass = "text-hydro-blue";
+            if (type === "agri") colorClass = "text-agri-leaf";
+            if (type === "solar") colorClass = "text-solar-gold";
+
+            const newEntry = document.createElement('div');
+            newEntry.innerHTML = `<span class="${colorClass}">[${timeStr}]</span> ${msg}`;
+            logBox.prepend(newEntry);
+
+            if (logBox.children.length > 10) {
+                logBox.removeChild(logBox.lastChild);
+            }
+        }
+
+        // =========================================================================
+        // 5. SELECCIÓN DE ARQUITECTURA
+        // =========================================================================
+        function selectArchNode(key) {
+            const data = archNodes[key];
+            if (!data) return;
+
+            document.querySelectorAll('.arch-node').forEach(node => {
+                node.classList.remove('border-solar-gold', 'bg-solar-gold/20');
+                node.classList.add('border-slate-700', 'bg-slate-800/60');
+            });
+
+            const activeEl = document.getElementById(`archNode-${key}`);
+            if (activeEl) {
+                activeEl.classList.remove('border-slate-700', 'bg-slate-800/60');
+                activeEl.classList.add('border-solar-gold', 'bg-solar-gold/20');
+            }
+
+            const panel = document.getElementById('archDetailPanel');
+            panel.innerHTML = `
+                <div class="flex items-center space-x-3 border-b border-slate-700 pb-4 mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl ${data.color}">
+                        <i class="fa-solid ${data.icon}"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-solar-gold uppercase tracking-widest">Ficha Técnica SIRAS</span>
+                        <h4 class="text-lg font-bold text-white">${data.title}</h4>
+                    </div>
+                </div>
+
+                <p class="text-xs text-slate-300 leading-relaxed mb-6">
+                    ${data.desc}
+                </p>
+
+                <div class="space-y-3 mb-6">
+                    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Especificaciones de Alto Nivel</span>
+                    ${data.specs.map(s => `
+                        <div class="flex justify-between items-center text-xs p-2.5 rounded-lg bg-slate-800/80 border border-slate-700/60">
+                            <span class="text-slate-400">${s.label}:</span>
+                            <span class="font-bold text-slate-100">${s.val}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // =========================================================================
+        // 6. CALCULADORA Y MODALES
+        // =========================================================================
+        function updateCalculator() {
+            const areaM2 = parseFloat(document.getElementById('calcAreaSlider').value) || 100;
+            const baseline = document.querySelector('input[name="calcBaseline"]:checked').value;
+
+            document.getElementById('calcAreaVal').innerText = areaM2 + ' m² (' + (areaM2 / 10000).toFixed(2) + ' Ha)';
+
+            const baseLitersPerM2 = 4.0;
+            const traditionalTotal = Math.round(areaM2 * baseLitersPerM2);
+            
+            const savingFactor = baseline === 'manguera' ? 0.40 : 0.35;
+            const aquaTotal = Math.round(traditionalTotal * (1 - savingFactor));
+            const savedLiters = traditionalTotal - aquaTotal;
+            const percentSaved = Math.round(savingFactor * 100);
+
+            const minCost = Math.round(areaM2 * 2);
+            const maxCost = Math.round(areaM2 * 3);
+
+            document.getElementById('resTraditionalVolume').innerText = traditionalTotal.toLocaleString('es-ES') + ' L / día';
+            document.getElementById('resAquaVolume').innerText = aquaTotal.toLocaleString('es-ES') + ' L / día';
+            document.getElementById('resSavedVolume').innerText = savedLiters.toLocaleString('es-ES') + ' Litros / día ahorrados';
+            document.getElementById('resPercentageSaved').innerText = '-' + percentSaved + ' %';
+            document.getElementById('resCostInstall').innerText = minCost + '€ - ' + maxCost + '€';
+        }
+
+        function openConfigModal() {
+            document.getElementById('configModal').classList.remove('hidden');
+        }
+        function closeConfigModal() {
+            document.getElementById('configModal').classList.add('hidden');
+        }
+
+        function saveProjectConfig(e) {
+            e.preventDefault();
+            projectData.name = document.getElementById('inputProjName').value.trim();
+            projectData.university = document.getElementById('inputUniv').value.trim();
+            projectData.department = document.getElementById('inputDept').value.trim();
+            projectData.advisor = document.getElementById('inputAdvisor').value.trim();
+            projectData.team = document.getElementById('inputTeam').value.trim();
+
+            document.getElementById('headerBrandName').innerHTML = `${projectData.name}`;
+            document.getElementById('heroUniversityTag').innerText = projectData.university;
+            document.getElementById('heroSubject').innerText = projectData.department;
+            document.getElementById('heroAdvisor').innerText = projectData.advisor;
+            document.getElementById('footerBrand').innerText = projectData.name;
+            document.getElementById('footerUniv').innerText = projectData.university;
+            document.getElementById('footerDept').innerText = projectData.department;
+            document.getElementById('footerAdvisor').innerText = projectData.advisor;
+            document.getElementById('footerTeamSummary').innerText = 'Equipo: ' + projectData.team;
+
+            closeConfigModal();
+            showToast("Datos de Kilimagua actualizados");
+        }
+
+        function openExportModal() {
+            document.getElementById('exportModal').classList.remove('hidden');
+        }
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.add('hidden');
+        }
+
+        function copyReportText() {
+            const reportText = `PROYECTO: SIRAS (Kilimagua)
+UNIVERSIDAD: Universitat Politècnica de Catalunya (UPC)
+DEPARTAMENTO: Enginyeria de Projectes i de la Construcció
+TUTORA: Elisabet Amorós Casahuga
+EQUIPO: Ariadna Camps, Sergi Carmona, Marc Gobern, Ruben Lozano, Judit Sabidó, Melanie Silberman, Joel Silva
+PARCELA PILOTO: 100 m² (0.01 Ha) en el Sahel
+OBJETIVO: Riego subterráneo por gravedad con tanque de 1.000 L y energía híbrida. Ahorro de agua >= 35%.`;
+
+            navigator.clipboard.writeText(reportText).then(() => {
+                showToast("Project Charter copiado al portapapeles");
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        window.onload = function() {
+            initFirebase();
+            initChart();
+            selectArchNode('hybrid');
+            updateCalculator();
+            startTelemetryLoop();
+        };
+    </script>
+</body>
+</html>
