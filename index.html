@@ -61,6 +61,7 @@
     <!-- Firebase App & Realtime Database SDKs (Compat v10) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <style>
         body {
@@ -128,7 +129,7 @@
                     <a href="#hero" class="text-slate-300 hover:text-solar-gold transition-colors">Inicio</a>
                     <a href="#objectives" class="text-slate-300 hover:text-solar-gold transition-colors">Objetivo y Alcance</a>
                     <a href="#architecture" class="text-slate-300 hover:text-solar-gold transition-colors">Arquitectura</a>
-                    <a href="#iot-dashboard" class="text-slate-300 hover:text-solar-gold transition-colors flex items-center gap-1">
+                    <a href="#iot-dashboard" onclick="openDash(event)" class="text-slate-300 hover:text-solar-gold transition-colors flex items-center gap-1">
                         <i class="fa-solid fa-microchip text-xs text-hydro-blue"></i>
                         Dashboard IoT
                     </a>
@@ -178,7 +179,7 @@
 
                     <!-- CTA Buttons -->
                     <div class="pt-2 flex flex-wrap gap-4 items-center">
-                        <a href="#iot-dashboard" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-solar-gold to-amber-600 hover:from-amber-500 hover:to-solar-gold text-slate-950 font-bold text-sm sm:text-base flex items-center gap-2 shadow-lg shadow-solar-gold/20 hover:shadow-solar-gold/40 transition-all hover:-translate-y-0.5">
+                        <a href="#iot-dashboard" onclick="openDash(event)" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-solar-gold to-amber-600 hover:from-amber-500 hover:to-solar-gold text-slate-950 font-bold text-sm sm:text-base flex items-center gap-2 shadow-lg shadow-solar-gold/20 hover:shadow-solar-gold/40 transition-all hover:-translate-y-0.5">
                             <i class="fa-solid fa-toggle-on text-slate-950"></i>
                             Dashboard de Control IoT
                         </a>
@@ -451,10 +452,16 @@
     </section>
 
     <!-- TELEMETRY & CONTROLS DASHBOARD -->
-    <section id="iot-dashboard" class="py-16 bg-slate-900/80 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div id="dashOverlay" onclick="closeDash()" class="fixed inset-0 z-[55] bg-slate-950/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    <aside id="iot-dashboard" role="dialog" aria-label="Dashboard IoT" aria-hidden="true" class="fixed top-0 right-0 bottom-0 z-[60] w-full sm:w-[560px] lg:w-[640px] bg-slate-900 border-l border-slate-700 shadow-2xl overflow-y-auto translate-x-full transition-transform duration-300 ease-out">
+        <div class="sticky top-0 z-10 flex items-center justify-between px-5 py-3 bg-slate-900/95 backdrop-blur border-b border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-widest text-hydro-cyan flex items-center gap-2"><i class="fa-solid fa-microchip"></i> Dashboard IoT</span>
+            <div class="flex items-center"><button onclick="toggleCfg()" id="cfgBtn" class="w-9 h-9 mr-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200" aria-label="Configuración"><i class="fa-solid fa-gear"></i></button>
+            <button onclick="closeDash()" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200" aria-label="Cerrar dashboard"><i class="fa-solid fa-xmark"></i></button></div>
+        </div>
+        <div id="dashMain" class="p-5 sm:p-6">
             
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div class="flex flex-col mb-6 gap-4">
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold uppercase tracking-widest text-agri-leaf px-3 py-1 rounded-full bg-agri-green/10 border border-agri-green/20">
@@ -465,7 +472,7 @@
                             Modo Local / Esperando Firebase
                         </span>
                     </div>
-                    <h2 class="text-3xl font-extrabold text-white mt-2">
+                    <h2 class="text-2xl font-extrabold text-white mt-2">
                         Dashboard telemétrico de control SIRAS
                     </h2>
                     <p class="text-slate-400 text-sm">
@@ -474,7 +481,7 @@
                 </div>
 
                 <!-- Mode Selector Controls -->
-                <div class="flex items-center gap-3 bg-slate-800 p-1.5 rounded-xl border border-slate-700 shrink-0">
+                <div class="flex items-center gap-3 bg-slate-800 p-1.5 rounded-xl border border-slate-700 shrink-0 self-start flex-wrap">
                     <button onclick="setSystemMode('auto')" id="modeBtnAuto" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-agri-green text-slate-950 shadow-md">
                         <i class="fa-solid fa-robot mr-1"></i> Modo Automático Arduino
                     </button>
@@ -485,7 +492,7 @@
             </div>
 
             <!-- Telemetry Metrics Grid Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+            <div class="grid grid-cols-2 gap-3 mb-6">
                 
                 <!-- Moisture -->
                 <div class="glass-card p-4 rounded-xl border border-slate-700">
@@ -540,7 +547,7 @@
                 </div>
 
                 <!-- Tank Level (1000L) -->
-                <div class="glass-card p-4 rounded-xl border border-slate-700 col-span-2 md:col-span-4 lg:col-span-1">
+                <div class="glass-card p-4 rounded-xl border border-slate-700 col-span-2">
                     <div class="text-slate-400 text-xs font-medium flex items-center justify-between">
                         <span>Tanque 1.000 L Gravedad</span>
                         <i class="fa-solid fa-database text-hydro-blue"></i>
@@ -557,9 +564,9 @@
             </div>
 
             <!-- Chart & Actuators Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="grid grid-cols-1 gap-5">
                 
-                <div class="lg:col-span-8 glass-panel p-6 rounded-2xl border border-slate-700">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-700">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                             <i class="fa-solid fa-chart-line text-agri-leaf"></i>
@@ -569,13 +576,13 @@
                             Umbral Mínimo: <strong class="text-amber-400">30%</strong> | Temp Máx: <strong class="text-red-400">30°C</strong>
                         </div>
                     </div>
-                    <div class="h-64 sm:h-80 w-full">
+                    <div class="h-64 w-full">
                         <canvas id="telemetryChart"></canvas>
                     </div>
                 </div>
 
                 <!-- MANUAL ACTUATOR CONTROLS -->
-                <div class="lg:col-span-4 glass-panel p-6 rounded-2xl border border-slate-700 flex flex-col justify-between">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-700 flex flex-col justify-between">
                     <div>
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
                             <i class="fa-solid fa-sliders text-solar-gold"></i>
@@ -635,7 +642,36 @@
             </div>
 
         </div>
-    </section>
+    
+        <div id="dashCfg" class="hidden p-5 sm:p-6">
+            <span class="text-xs font-bold uppercase tracking-widest text-solar-gold">Configuración</span>
+            <h3 class="text-2xl font-extrabold text-white mt-2">Dashboard · Firebase · ESP32</h3>
+            <p id="cfgEspStatus" class="text-xs text-slate-400 mt-2 mb-5">ESP32: sin datos todavía</p>
+
+            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-4 mb-5">
+                <h4 class="font-bold text-white text-sm">1. Conexión Firebase</h4>
+                <p class="text-[11px] text-slate-400 mb-3">Se guarda solo en este navegador (localStorage).</p>
+                <textarea id="cfgPaste" rows="3" placeholder="Pega aquí el objeto firebaseConfig de la consola de Firebase..." class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white font-mono text-xs"></textarea>
+                <button onclick="cfgFillFromPaste()" class="mt-2 text-xs font-bold text-hydro-cyan hover:underline">Rellenar campos desde el texto pegado</button>
+                <div id="cfgFb" class="grid gap-3 mt-3"></div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="cfgSaveFb()" class="px-4 py-2 rounded-lg bg-agri-green text-slate-950 text-xs font-bold">Guardar y reconectar</button>
+                    <button onclick="cfgClearFb()" class="px-4 py-2 rounded-lg bg-slate-700 text-slate-200 text-xs font-bold">Borrar</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-4 mb-5">
+                <h4 class="font-bold text-white text-sm">2. Parámetros del ESP32</h4>
+                <p class="text-[11px] text-slate-400 mb-3">Se guardan en Firebase (<code>/siras/config</code>) y el ESP32 los aplica en menos de 10 s, sin reprogramarlo.</p>
+                <div id="cfgEsp"></div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="cfgSaveEsp()" class="px-4 py-2 rounded-lg bg-agri-green text-slate-950 text-xs font-bold">Enviar al ESP32</button>
+                    <button onclick="cfgDefaultsEsp()" class="px-4 py-2 rounded-lg bg-slate-700 text-slate-200 text-xs font-bold">Valores por defecto</button>
+                </div>
+            </div>
+            <p class="text-[11px] text-slate-500">WiFi, usuario/contraseña del ESP32 y pines solo se cambian en el firmware.</p>
+        </div>
+    </aside>
 
     <!-- WATER SAVINGS & IMPACT CALCULATOR -->
     <section id="calculator" class="py-16 border-b border-slate-800">
@@ -984,15 +1020,17 @@
         // =========================================================================
         // 1. CONFIGURACIÓN DE FIREBASE REALTIME DATABASE
         // =========================================================================
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_PROYECTO.firebaseapp.com",
-            databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
-            projectId: "TU_PROYECTO",
-            storageBucket: "TU_PROYECTO.appspot.com",
-            messagingSenderId: "TU_SENDER_ID",
-            appId: "TU_APP_ID"
-        };
+          apiKey: "AIzaSyAULuAv4x_8JWBXDqwyalH0r_IIvKfqxNw",
+          authDomain: "siras-62a50.firebaseapp.com",
+          databaseURL: "https://siras-62a50-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "siras-62a50",
+          storageBucket: "siras-62a50.firebasestorage.app",
+          messagingSenderId: "914459747324",
+          appId: "1:914459747324:web:6f00b05642773290bb4879",
+          measurementId: "G-W6BQ531MKN"
+        };, (function(){ try { return JSON.parse(localStorage.getItem('siras_fb_config') || '{}'); } catch(e) { return {}; } })());
 
         let db = null;
         let firebaseConnected = false;
@@ -1001,16 +1039,17 @@
             try {
                 if (firebaseConfig.apiKey !== "TU_API_KEY") {
                     firebase.initializeApp(firebaseConfig);
-                    db = firebase.database();
-                    firebaseConnected = true;
-                    
-                    document.getElementById('firebaseConnStatus').innerHTML = `
-                        <span class="w-2.5 h-2.5 rounded-full bg-agri-green"></span>
-                        Conectado a Firebase Realtime
-                    `;
-                    logConsoleEvent("Conectado con éxito a Firebase Realtime Database.", "agri");
-                    
-                    listenFirebaseUpdates();
+                    // Las reglas exigen usuario autenticado: la web entra de forma anónima.
+                    firebase.auth().signInAnonymously().then(() => {
+                        db = firebase.database();
+                        firebaseConnected = true;
+                        document.getElementById('firebaseConnStatus').innerHTML = `
+                            <span class="w-2.5 h-2.5 rounded-full bg-agri-green"></span>
+                            Conectado a Firebase Realtime
+                        `;
+                        logConsoleEvent("Conectado con éxito a Firebase Realtime Database.", "agri");
+                        listenFirebaseUpdates();
+                    }).catch(err => console.error("Error de autenticación en Firebase:", err));
                 } else {
                     console.log("Firebase no configurado. Ejecutando en modo simulación/demo local.");
                 }
@@ -1058,6 +1097,12 @@
                     if (data.humedad !== undefined) telemetryData.moist = data.humedad;
                     if (data.temperatura !== undefined) telemetryData.temp = data.temperatura;
                     if (data.bateria !== undefined) telemetryData.battery = data.bateria;
+                    if (data.nivelTanque !== undefined) {
+                        telemetryData.tankLitres = Math.round(data.nivelTanque);
+                        const pct = Math.max(0, Math.min(100, Math.round(telemetryData.tankLitres / 10)));
+                        document.getElementById('valTankLevel').innerText = telemetryData.tankLitres + ' L (' + pct + '%)';
+                        document.getElementById('tankProgressBar').style.width = pct + '%';
+                    }
                     updateDashboardUI();
                 }
             });
@@ -1477,6 +1522,128 @@ OBJETIVO: Riego subterráneo por gravedad con tanque de 1.000 L y energía híbr
             updateCalculator();
             startTelemetryLoop();
         };
+    </script>
+
+    <!-- Pestaña lateral del Dashboard IoT -->
+    <button id="dashTab" onclick="openDash(event)" aria-label="Abrir Dashboard IoT" class="fixed right-0 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2 px-2.5 py-4 rounded-l-xl bg-gradient-to-b from-hydro-blue to-hydro-deep text-white shadow-xl shadow-black/40 border border-r-0 border-sky-400/30 hover:pr-4 transition-all">
+        <span class="w-2 h-2 rounded-full bg-agri-leaf animate-pulse"></span>
+        <i class="fa-solid fa-microchip text-sm"></i>
+        <span class="text-[11px] font-bold tracking-widest uppercase" style="writing-mode:vertical-rl">Dashboard IoT</span>
+        <i class="fa-solid fa-chevron-left text-[10px]"></i>
+    </button>
+
+    <script>
+        function openDash(e){
+            if(e) e.preventDefault();
+            document.getElementById('iot-dashboard').classList.remove('translate-x-full');
+            document.getElementById('iot-dashboard').setAttribute('aria-hidden','false');
+            var o=document.getElementById('dashOverlay');o.classList.remove('opacity-0','pointer-events-none');
+            document.getElementById('dashTab').classList.add('hidden');
+            setTimeout(function(){ if(typeof chartInstance!=='undefined' && chartInstance) chartInstance.resize(); },350);
+        }
+        function closeDash(){
+            document.getElementById('iot-dashboard').classList.add('translate-x-full');
+            document.getElementById('iot-dashboard').setAttribute('aria-hidden','true');
+            document.getElementById('dashOverlay').classList.add('opacity-0','pointer-events-none');
+            document.getElementById('dashTab').classList.remove('hidden');
+        }
+        document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDash(); });
+    </script>
+
+    <script>
+        // ===== Configuración editable desde la web =====
+        const FB_FIELDS = [['apiKey','API Key'],['authDomain','Auth Domain'],['databaseURL','Database URL'],['projectId','Project ID'],['storageBucket','Storage Bucket'],['messagingSenderId','Messaging Sender ID'],['appId','App ID']];
+        const ESP_PARAMS = [
+            {k:'moistOn', l:'Abrir riego con humedad menor de', u:'%', d:30, min:5, max:80, s:1, g:'Riego'},
+            {k:'moistOff', l:'Cerrar riego con humedad mayor de', u:'%', d:35, min:10, max:95, s:1, g:'Riego'},
+            {k:'tempMax', l:'Bloquear riego sobre', u:'°C', d:30, min:20, max:45, s:0.5, g:'Riego'},
+            {k:'tankMinL', l:'Nivel mínimo del tanque', u:'L', d:50, min:0, max:500, s:10, g:'Riego'},
+            {k:'maxRiegoMin', l:'Riego continuo máximo', u:'min', d:20, min:1, max:60, s:1, g:'Seguridad'},
+            {k:'lockoutMin', l:'Pausa tras el máximo', u:'min', d:10, min:1, max:120, s:1, g:'Seguridad'},
+            {k:'pushSec', l:'Enviar datos cada', u:'s', d:5, min:2, max:300, s:1, g:'Comunicación'},
+            {k:'soilRawDry', l:'Sonda humedad: lectura en seco', u:'ADC', d:3200, min:500, max:4095, s:10, g:'Calibración'},
+            {k:'soilRawWet', l:'Sonda humedad: lectura en agua', u:'ADC', d:1400, min:0, max:3500, s:10, g:'Calibración'},
+            {k:'tankDistEmptyCm', l:'Tanque vacío: distancia sensor-agua', u:'cm', d:100, min:20, max:400, s:1, g:'Calibración'},
+            {k:'tankDistFullCm', l:'Tanque lleno: distancia sensor-agua', u:'cm', d:20, min:5, max:300, s:1, g:'Calibración'},
+            {k:'tankCapacityL', l:'Capacidad del tanque', u:'L', d:1000, min:100, max:5000, s:50, g:'Calibración'},
+            {k:'batVEmpty', l:'Batería 0 %', u:'V', d:11.0, min:6, max:14, s:0.1, g:'Calibración'},
+            {k:'batVFull', l:'Batería 100 %', u:'V', d:12.8, min:8, max:16, s:0.1, g:'Calibración'}
+        ];
+        const INP = 'w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white';
+        let cfgLastSeen = null, cfgListening = false;
+
+        function renderCfg() {
+            document.getElementById('cfgFb').innerHTML = FB_FIELDS.map(f =>
+                `<label class="text-[11px] text-slate-400">${f[1]}<input id="fb_${f[0]}" class="${INP} mt-1" value="${(firebaseConfig[f[0]]||'').replace(/"/g,'&quot;')}"></label>`).join('');
+            let html = '', grp = '';
+            ESP_PARAMS.forEach(p => {
+                if (p.g !== grp) { grp = p.g; html += `<div class="text-[11px] font-bold uppercase tracking-widest text-hydro-cyan mt-4 mb-2">${grp}</div>`; }
+                html += `<label class="flex items-center justify-between gap-3 py-1.5 text-xs text-slate-300">${p.l}
+                    <span class="flex items-center gap-1.5 shrink-0"><input id="esp_${p.k}" type="number" min="${p.min}" max="${p.max}" step="${p.s}" value="${p.d}" class="w-24 bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-white text-right"><span class="w-8 text-slate-500">${p.u}</span></span></label>`;
+            });
+            document.getElementById('cfgEsp').innerHTML = html;
+        }
+
+        function toggleCfg() {
+            const main = document.getElementById('dashMain'), cfg = document.getElementById('dashCfg');
+            const showCfg = cfg.classList.contains('hidden');
+            cfg.classList.toggle('hidden', !showCfg);
+            main.classList.toggle('hidden', showCfg);
+            document.getElementById('cfgBtn').classList.toggle('bg-agri-green', showCfg);
+            document.getElementById('iot-dashboard').scrollTop = 0;
+        }
+
+        function cfgFillFromPaste() {
+            const txt = document.getElementById('cfgPaste').value;
+            const re = /["']?(\w+)["']?\s*:\s*["']([^"']*)["']/g; let m, n = 0;
+            while ((m = re.exec(txt))) { const el = document.getElementById('fb_' + m[1]); if (el) { el.value = m[2]; n++; } }
+            showToast(n ? n + ' campos rellenados' : 'No se encontraron campos');
+        }
+        function cfgSaveFb() {
+            const o = {}; FB_FIELDS.forEach(f => o[f[0]] = document.getElementById('fb_' + f[0]).value.trim());
+            if (!o.apiKey || !o.databaseURL) { showToast('Falta API Key o Database URL'); return; }
+            localStorage.setItem('siras_fb_config', JSON.stringify(o));
+            location.reload();
+        }
+        function cfgClearFb() { localStorage.removeItem('siras_fb_config'); location.reload(); }
+
+        function cfgFillEsp(v) { ESP_PARAMS.forEach(p => { if (v && v[p.k] !== undefined) document.getElementById('esp_' + p.k).value = v[p.k]; }); }
+        function cfgDefaultsEsp() { const d = {}; ESP_PARAMS.forEach(p => d[p.k] = p.d); cfgFillEsp(d); showToast('Valores por defecto cargados (pulsa Enviar)'); }
+        function cfgSaveEsp() {
+            if (!firebaseConnected || !db) { showToast('Firebase no está conectado'); return; }
+            const o = {};
+            for (const p of ESP_PARAMS) {
+                const v = parseFloat(document.getElementById('esp_' + p.k).value);
+                if (isNaN(v) || v < p.min || v > p.max) { showToast(p.l + ': valor entre ' + p.min + ' y ' + p.max); return; }
+                o[p.k] = v;
+            }
+            if (o.moistOff <= o.moistOn) { showToast('Cerrar riego debe ser mayor que abrir riego'); return; }
+            if (o.soilRawDry <= o.soilRawWet) { showToast('Sonda: seco debe ser mayor que agua'); return; }
+            if (o.tankDistEmptyCm <= o.tankDistFullCm) { showToast('Tanque: distancia vacío > lleno'); return; }
+            if (o.batVFull <= o.batVEmpty) { showToast('Batería: 100 % debe ser mayor que 0 %'); return; }
+            db.ref('siras/config').update(o)
+                .then(() => { showToast('Parámetros enviados al ESP32'); logConsoleEvent('Configuración del ESP32 actualizada desde la web.', 'hydro'); })
+                .catch(e => showToast('Error: ' + e.message));
+        }
+
+        function cfgWatch() {
+            if (cfgListening || !firebaseConnected || !db) return;
+            cfgListening = true;
+            db.ref('siras/config').on('value', s => { if (s.val()) cfgFillEsp(s.val()); });
+            db.ref('siras/sensores/ultimaLectura').on('value', s => { cfgLastSeen = s.val(); });
+        }
+        function cfgStatus() {
+            const el = document.getElementById('cfgEspStatus');
+            if (!firebaseConnected) { el.innerHTML = '<span class="text-amber-400">● Firebase sin conectar (modo demo)</span>'; return; }
+            if (!cfgLastSeen) { el.innerHTML = '<span class="text-amber-400">● Firebase conectado · ESP32 sin datos todavía</span>'; return; }
+            const age = Math.round((Date.now() - cfgLastSeen) / 1000);
+            const limit = Math.max(20, 3 * (parseFloat(document.getElementById('esp_pushSec').value) || 5));
+            el.innerHTML = age <= limit
+                ? '<span class="text-agri-leaf">● ESP32 en línea · último dato hace ' + Math.max(age, 0) + ' s</span>'
+                : '<span class="text-red-400">● ESP32 sin señal · último dato hace ' + (age > 120 ? Math.round(age / 60) + ' min' : age + ' s') + '</span>';
+        }
+        renderCfg();
+        setInterval(() => { cfgWatch(); cfgStatus(); }, 1000);
     </script>
 </body>
 </html>

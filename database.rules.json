@@ -1,0 +1,45 @@
+{
+  "rules": {
+    "siras": {
+      ".read": "auth != null",
+
+      "sensores": {
+        ".write": "auth.uid === 'PEGA_AQUI_EL_UID_DEL_ESP32'",
+        "humedad":      { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+        "temperatura":  { ".validate": "newData.isNumber() && newData.val() > -20 && newData.val() < 80" },
+        "bateria":      { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+        "nivelTanque":  { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000" },
+        "ultimaLectura":{ ".validate": "newData.isNumber()" },
+        "$other":       { ".validate": false }
+      },
+
+      "config": {
+        ".write": "auth != null",
+        "moistOn": { ".validate": "newData.isNumber() && newData.val() >= 5 && newData.val() <= 80" },
+        "moistOff": { ".validate": "newData.isNumber() && newData.val() >= 10 && newData.val() <= 95" },
+        "tempMax": { ".validate": "newData.isNumber() && newData.val() >= 20 && newData.val() <= 45" },
+        "tankMinL": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 500" },
+        "maxRiegoMin": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 60" },
+        "lockoutMin": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 120" },
+        "pushSec": { ".validate": "newData.isNumber() && newData.val() >= 2 && newData.val() <= 300" },
+        "soilRawDry": { ".validate": "newData.isNumber() && newData.val() >= 500 && newData.val() <= 4095" },
+        "soilRawWet": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3500" },
+        "tankDistEmptyCm": { ".validate": "newData.isNumber() && newData.val() >= 20 && newData.val() <= 400" },
+        "tankDistFullCm": { ".validate": "newData.isNumber() && newData.val() >= 5 && newData.val() <= 300" },
+        "tankCapacityL": { ".validate": "newData.isNumber() && newData.val() >= 100 && newData.val() <= 5000" },
+        "batVEmpty": { ".validate": "newData.isNumber() && newData.val() >= 6 && newData.val() <= 14" },
+        "batVFull": { ".validate": "newData.isNumber() && newData.val() >= 8 && newData.val() <= 16" },
+        "$other": { ".validate": false }
+      },
+
+      "actuadores": {
+        ".write": "auth != null",
+        "modo":             { ".validate": "newData.val() === 'auto' || newData.val() === 'manual'" },
+        "valvulaA":         { ".validate": "newData.isBoolean()" },
+        "valvulaB":         { ".validate": "newData.isBoolean()" },
+        "valvulaPrincipal": { ".validate": "newData.isBoolean()" },
+        "$other":           { ".validate": false }
+      }
+    }
+  }
+}
