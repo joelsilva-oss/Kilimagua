@@ -1020,15 +1020,17 @@
         // =========================================================================
         // 1. CONFIGURACIÓN DE FIREBASE REALTIME DATABASE
         // =========================================================================
-        const firebaseConfig = Object.assign({
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_PROYECTO.firebaseapp.com",
-            databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
-            projectId: "TU_PROYECTO",
-            storageBucket: "TU_PROYECTO.appspot.com",
-            messagingSenderId: "TU_SENDER_ID",
-            appId: "TU_APP_ID"
-        }, (function(){ try { return JSON.parse(localStorage.getItem('siras_fb_config') || '{}'); } catch(e) { return {}; } })());
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyAULuAv4x_8JWBXDqwyalH0r_IIvKfqxNw",
+          authDomain: "siras-62a50.firebaseapp.com",
+          databaseURL: "https://siras-62a50-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "siras-62a50",
+          storageBucket: "siras-62a50.firebasestorage.app",
+          messagingSenderId: "914459747324",
+          appId: "1:914459747324:web:6f00b05642773290bb4879",
+          measurementId: "G-W6BQ531MKN"
+        };, (function(){ try { return JSON.parse(localStorage.getItem('siras_fb_config') || '{}'); } catch(e) { return {}; } })());
 
         let db = null;
         let firebaseConnected = false;
